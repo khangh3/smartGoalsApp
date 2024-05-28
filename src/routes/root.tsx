@@ -1,36 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, LoaderFunction, useLoaderData } from "react-router-dom";
+import { MonthToDays, MonthsToNames, Day } from "../api";
 
-// array of number of days in each month
-const MonthToDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-const MonthsToNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-type Day = {
-  day: number;
-  month: number;
-  year: number;
-  currentMonth: boolean;
+export const loader: LoaderFunction = async ({ params }) => {
+  console.log(params);
+  return null;
 };
 
-const getCalendar = (date: Date): Day[] => {
-  const firstDate = new Date(date.getFullYear(), date.getMonth(), 0o1);
+const getCalendar = (date: Date) => {
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 0o1);
   // const firstDate = new Date("10-01-2024");
 
   // get weekday
-  const weekday = firstDate.getDay();
-  let firstDayOfCalendar = firstDate;
+  const weekday = firstDayOfMonth.getDay();
+
+  // find the date of the first sunday
+  let firstDayOfCalendar = firstDayOfMonth;
 
   // if this date is not the very first day, then find it
   if (weekday > 0) {
@@ -39,45 +23,43 @@ const getCalendar = (date: Date): Day[] => {
 
     // if january set previous month to 11 aka December
     const previousMonth =
-      firstDate.getMonth() !== 0 ? firstDate.getMonth() - 1 : 11;
+      firstDayOfMonth.getMonth() !== 0 ? firstDayOfMonth.getMonth() - 1 : 11;
 
     const day = MonthToDays[previousMonth] - difference;
     firstDayOfCalendar = new Date(
       // if january set year to previous year
-      firstDate.getMonth() !== 0
-        ? firstDate.getFullYear()
-        : firstDate.getFullYear() - 1,
+      firstDayOfMonth.getMonth() !== 0
+        ? firstDayOfMonth.getFullYear()
+        : firstDayOfMonth.getFullYear() - 1,
       previousMonth,
       day,
     );
   }
   let year = firstDayOfCalendar.getFullYear();
-  let indexMonth = firstDayOfCalendar.getMonth();
-  let month = indexMonth + 1;
+  let month = firstDayOfCalendar.getMonth();
   let day = firstDayOfCalendar.getDate();
 
   // now fill out the 5x7 calendar
-  const calendar = Array(35);
+  const calendar = Array<Day>(35);
   for (let i = 0; i < calendar.length; ++i) {
     const s: Day = {
       year: year,
       month: month,
       day: day,
-      currentMonth: indexMonth === date.getMonth(),
+      currentMonth: month === date.getMonth(),
     };
     calendar[i] = s;
 
     // increment dayArr
-    if (day !== MonthToDays[indexMonth]) {
+    if (day !== MonthToDays[month]) {
       day += 1;
     } else {
-      if (indexMonth === 11) {
-        indexMonth = 0;
+      if (month === 11) {
+        month = 0;
         year += 1;
       } else {
-        indexMonth += 1;
+        month += 1;
       }
-      month = indexMonth + 1;
       day = 1;
     }
   }
@@ -85,9 +67,10 @@ const getCalendar = (date: Date): Day[] => {
 };
 
 const ClickableBoxes = ({ date }: { date: Day }) => {
+  const month = date.month + 1;
   const url =
     date.year.toString() +
-    (date.month >= 10 ? date.month : "0" + date.month) +
+    (month >= 10 ? month : "0" + month) +
     (date.day >= 10 ? date.day : "0" + date.day);
   return (
     <Link className="flex justify-center items-center h-36" to={`dates/${url}`}>
@@ -101,15 +84,36 @@ const ClickableBoxes = ({ date }: { date: Day }) => {
 };
 
 const Calendar = ({ date }: { date: Date }) => {
-  const calendar = getCalendar(date).map((element, index) => {
+  const calendar = getCalendar(date).map((day, index) => {
     return (
       <li key={index} className="border border-black">
-        <ClickableBoxes date={element} />
+        <ClickableBoxes date={day} />
       </li>
     );
   });
   return (
     <ul className="w-5/6 grid grid-cols-7 gap-0 m-2 border border-black">
+      <li className="h-10 border-black border text-center">
+        <h1>Sunday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Monday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Tuesday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Wednesday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Thursday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Friday</h1>
+      </li>
+      <li className="h-10 border-black border text-center">
+        <h1>Saturday</h1>
+      </li>
       {calendar}
     </ul>
   );
@@ -121,9 +125,9 @@ export default function Root() {
   return (
     <>
       <h1 className="font-bold text-4xl">
-        {MonthsToNames[date.getMonth() + 1]} {date.getFullYear()}{" "}
+        {MonthsToNames[date.getMonth()]} {date.getFullYear()}{" "}
       </h1>
-      <Link to={"/editGoals"} className="pb-5">
+      <Link to={"/createGoal"} className="pb-5">
         Create New Goal
       </Link>
       <Calendar date={date} />

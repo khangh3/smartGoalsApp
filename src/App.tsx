@@ -1,7 +1,10 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Root from "./routes/root";
 import Date, { loader as dateLoader } from "./routes/date";
-import EditGoals, { loader as editLoader } from "./routes/edit";
+import CreateGoal, {
+  loader as createGoalLoader,
+  action as createGoalAction,
+} from "./routes/createGoals";
 
 const router = createBrowserRouter([
   {
@@ -14,20 +17,22 @@ const router = createBrowserRouter([
     loader: dateLoader,
   },
   {
-    path: "/dates/:dateId/editGoals",
-    element: <EditGoals />,
-    loader: editLoader,
+    path: "/dates/:dateId/createGoal",
+    element: <CreateGoal />,
+    loader: createGoalLoader,
+    action: createGoalAction,
   },
   {
-    path: "/editGoals",
-    element: <EditGoals />,
-    loader: editLoader,
+    path: "/createGoal",
+    element: <CreateGoal />,
+    loader: createGoalLoader,
+    action: createGoalAction,
   },
 ]);
 
 function App() {
   return (
-    <div className="flex flex-col p-4 justify-center items-center">
+    <div className="flex flex-col p-4 items-center">
       <RouterProvider router={router} />
     </div>
   );

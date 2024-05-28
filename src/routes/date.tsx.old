@@ -24,9 +24,9 @@ const TaskElement = ({ id, tasks }: goalDisplayProp) => {
   ));
   return (
     <>
-      <div className="flex flex-row gap-2 self-start">
-        <p key={id}>{task?.objective}</p>
+      <div className="flex flex-row gap-2">
         <input type="checkbox" />
+        <p key={id}>{task?.objective}</p>
       </div>
       {children}
     </>
@@ -42,32 +42,25 @@ export default function Date() {
 
   const [goalDisplayed, setGoalDisplayed] = useState<number | null>(null);
 
-  console.log(goalDisplayed !== null ? goalsArray[goalDisplayed].tasks : null);
-  const taskList =
-    goalDisplayed !== null ? (
-      <div>
-        <TaskElement
-          id={goalsArray[goalDisplayed].root}
-          tasks={goalsArray[goalDisplayed].tasks}
-        />
-      </div>
-    ) : null;
-
   const goals = goalsArray.map(({ root: rootId, tasks }, index) => {
     const showMore = goalDisplayed == index;
     const root = tasks.find((task) => task.id == rootId);
+    const taskList = <TaskElement id={rootId} tasks={tasks} />;
 
     return (
       <li key={rootId} className="mb-2">
-        <p
-          className="p-2 border-2 border-black rounded-lg font-bold text-gray-400 text-3xl text-center hover:cursor-pointer"
-          onClick={() => {
-            if (showMore) setGoalDisplayed(null);
-            else setGoalDisplayed(index);
-          }}
-        >
-          {root?.objective}
-        </p>
+        <div className="flex flex-row gap-2">
+          <p
+            className="p-2 border-2 border-black rounded-lg font-bold text-gray-400 text-3xl text-center hover:cursor-pointer self-start"
+            onClick={() => {
+              if (showMore) setGoalDisplayed(null);
+              else setGoalDisplayed(index);
+            }}
+          >
+            {root?.objective}
+          </p>
+          <div>{showMore ? taskList : null}</div>
+        </div>
       </li>
     );
   });
@@ -89,10 +82,7 @@ export default function Date() {
         </Link>
       </div>
       <h2 className="font-bold text-4xl">Goals</h2>
-      <div className="flex gap-2">
-        <ul>{goals}</ul>
-        {taskList}
-      </div>
+      <ul>{goals}</ul>
     </>
   );
 }
